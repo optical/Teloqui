@@ -1,0 +1,21 @@
+﻿{
+  "version": "1.0.0-*",
+  "description": "Optigram, a Telgram Bot Library",
+  "authors": [
+    "Jared Klopper <jaredklopper@gmail.com>"
+  ],
+  "tags": [
+    ""
+  ],
+  "projectUrl": "",
+  "licenseUrl": "",
+  "dependencies": {
+    "Newtonsoft.Json": "7.0.1",
+    "Microsoft.AspNet.WebApi.Client": "5.2.3",
+    "Microsoft.CSharp": "4.0.0"
+  },
+  "frameworks": {
+    "net452": { },
+    "dnx451": { }
+  }
+}
