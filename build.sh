@@ -6,4 +6,4 @@ dnvm use 1.0.0-rc1-update1
 
 cd Teloqui
 dnu restore
-dnu build
+dnu build --framework dnx451
