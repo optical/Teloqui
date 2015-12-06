@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Optigram.Data {
+namespace Teloqui.Data {
 
 	public class EnumMemberAttribute : Attribute {
 		public string Value { get; set; }

@@ -1,7 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 
-namespace Optigram.Data {
+namespace Teloqui.Data {
 	[JsonObject]
 	public class Message {
 

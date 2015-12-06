@@ -1,4 +1,4 @@
-﻿namespace Optigram.Data {
+﻿namespace Teloqui.Data {
 
 	public enum ChatAction {
 

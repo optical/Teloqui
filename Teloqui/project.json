@@ -1,6 +1,6 @@
 ﻿{
-  "version": "1.0.0-*",
-  "description": "Optigram, a Telgram Bot Library",
+  "version": "0.0.1-*",
+  "description": "Teloqui, a Telgram Bot Library",
   "authors": [
     "Jared Klopper <jaredklopper@gmail.com>"
   ],

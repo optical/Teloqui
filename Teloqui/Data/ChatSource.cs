@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Optigram.Data {
+namespace Teloqui.Data {
 
 	public abstract class ChatSource {
 
