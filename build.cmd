@@ -1,3 +1,8 @@
+@echo off
+cd %~dp0
+
+setlocal EnableDelayedExpansion
+
 where dnvm
 
 if %ERRORLEVEL% neq 0 (
