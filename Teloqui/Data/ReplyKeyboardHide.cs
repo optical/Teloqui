@@ -6,9 +6,7 @@ namespace Teloqui.Data {
 	public class ReplyKeyboardHide {
 
 		[JsonProperty("hide_keyboard")]
-		public bool HideKeyboard {
-			get { return true; }
-		}
+		public bool HideKeyboard => true;
 
 		[JsonProperty("selective")]
 		public bool Selective { get; set; }

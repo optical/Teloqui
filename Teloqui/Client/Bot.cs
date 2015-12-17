@@ -245,8 +245,8 @@ namespace Optigram.Client {
 			return PerformPost<UserProfilePhotos[]>("getUserProfilePhotos", parameters, cancellationToken);
 		}
 
-		public Task<ApiResponse<Update>> GetUpdates(CancellationToken cancellationToken = default(CancellationToken)) {
-			return PerformGet<Update>("getUpdates", cancellationToken);
+		public Task<ApiResponse<Update[]>> GetUpdates(CancellationToken cancellationToken = default(CancellationToken)) {
+			return PerformGet<Update[]>("getUpdates", cancellationToken);
 		}
 
 		public Task<ApiResponse<object>> GetFileAsync(string fileId, CancellationToken cancellationToken = default(CancellationToken)) {
