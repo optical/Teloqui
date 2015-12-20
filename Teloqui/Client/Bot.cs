@@ -15,7 +15,7 @@ namespace Teloqui.Client {
 	using ParameterList = Dictionary<string, string>;
 	using ReplyMarkup = Object;
 
-	public class Bot {
+	internal partial class Bot {
 		private readonly HttpClient _httpClient;
 		private readonly JsonSerializer _serializer;
 		
