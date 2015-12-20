@@ -1,5 +1,6 @@
 ﻿using System;
 using Newtonsoft.Json;
+using Teloqui.Serialization;
 
 namespace Teloqui.Data {
 	[JsonObject]
@@ -12,16 +13,18 @@ namespace Teloqui.Data {
 		public User From { get; set; }
 
 		[JsonProperty("date")]
-		public DateTime Date { get; set; }
+		[JsonConverter(typeof(DateTimeOffsetToUnixTimeConverter))]
+		public DateTimeOffset Date { get; set; }
 
 		[JsonProperty("chat")]
-		public ChatSource Destination { get; set; }
+		public Chat Destination { get; set; }
 
 		[JsonProperty("forward_from")]
 		public User ForwardFrom { get; set; }
 
 		[JsonProperty("forward_date")]
-		public DateTime ForwardDate { get; set; }
+		[JsonConverter(typeof(DateTimeOffsetToUnixTimeConverter))]
+		public DateTimeOffset? ForwardDate { get; set; }
 
 		[JsonProperty("reply_to_message")]
 		public Message ReplyToMessage { get; set; }

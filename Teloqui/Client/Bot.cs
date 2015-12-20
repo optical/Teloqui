@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Teloqui.Data;
 
-namespace Optigram.Client {
+namespace Teloqui.Client {
 
 	using MessageResponse = Task<ApiResponse<Message>>;
 	using ParameterList = Dictionary<string, string>;
@@ -38,7 +38,7 @@ namespace Optigram.Client {
 		}
 
 		public MessageResponse SendMessageAsync(
-			ChatSource destination,
+			Chat destination,
 			string message,
 			bool? disableWebPagePreview = null,
 			int? replyToMessageId = null,
