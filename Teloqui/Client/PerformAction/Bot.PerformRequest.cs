@@ -9,8 +9,8 @@ using Teloqui.Data;
 
 namespace Teloqui.Client.SendMessage
 {
-    internal partial class Bot
-    {
+    internal partial class Bot {
+        
         private readonly JsonSerializer _serializer;
 
         private async Task<ApiResponse<T>> PerformRequest<T>(Func<Task<HttpResponseMessage>> messageFactory) {
