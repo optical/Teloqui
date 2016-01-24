@@ -1,6 +1,5 @@
 @echo off
 cd %~dp0
-
 setlocal EnableDelayedExpansion
 
 where dnvm
@@ -17,7 +16,10 @@ call dnvm update-self
 call dnvm install 1.0.0-rc1-update1
 call dnvm use 1.0.0-rc1-update1
 
+pushd src
 pushd Teloqui
 call dnu restore
 call dnu build
+popd
+
 popd
