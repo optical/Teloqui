@@ -8,7 +8,7 @@ namespace Teloqui.Data {
 		public int Id { get; set; }
 
 		[JsonProperty("type")]
-		public string Type { get; set; }
+		public ChatType Type { get; set; }
 
 		[JsonProperty("title")]
 		public string Title { get; set; }

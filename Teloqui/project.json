@@ -1,6 +1,6 @@
 ﻿{
   "version": "0.0.1-*",
-  "description": "Teloqui, a Telgram Bot Library",
+  "description": "Teloqui, a Telegram Bot Library",
   "authors": [
     "Jared Klopper <jaredklopper@gmail.com>"
   ],
@@ -15,7 +15,11 @@
     "Microsoft.CSharp": "4.0.0"
   },
   "frameworks": {
+    "net45": { },
+    "net451": { },
     "net452": { },
-    "dnx451": { }
+    "net46": { },
+    "dnx451": { },
+    "dnx452": { }
   }
 }
