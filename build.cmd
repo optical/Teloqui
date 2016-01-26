@@ -16,10 +16,15 @@ call dnvm update-self
 call dnvm install 1.0.0-rc1-update1
 call dnvm use 1.0.0-rc1-update1
 
+call dnu restore
+
 pushd src
 pushd Teloqui
-call dnu restore
 call dnu build
+popd
+pushd Teloqui.Tests
+call dnu build
+call dnx test
 popd
 
 popd
