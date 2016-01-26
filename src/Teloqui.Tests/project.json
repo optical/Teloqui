@@ -9,13 +9,13 @@
     "test": "xunit.runner.dnx"
   },
   "frameworks": {
-    "net452": {
+    "net451": {
       "frameworkAssemblies": {
         "System.Runtime": "4.0.10.0",
         "System.Threading.Tasks": "4.0.0.0"
       }
     },
-    "dnx452": {
+    "dnx451": {
       "dependencies": {
         "xunit.runner.dnx": "2.1.0-rc1-build204"
       }
