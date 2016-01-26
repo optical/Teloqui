@@ -1,0 +1,28 @@
+﻿{
+  "version": "1.0.0-*",
+  "description": "Teloqui.Tests Class Library",
+  "authors": [ "Jared" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+  "commands": {
+    "test": "xunit.runner.dnx"
+  },
+  "frameworks": {
+    "net452": {
+      "frameworkAssemblies": {
+        "System.Runtime": "4.0.10.0",
+        "System.Threading.Tasks": "4.0.0.0"
+      }
+    },
+    "dnx452": {
+      "dependencies": {
+        "xunit.runner.dnx": "2.1.0-rc1-build204"
+      }
+    }
+  },
+  "dependencies": {
+    "Teloqui": "0.0.1-*",
+    "xunit": "2.1.0"
+  }
+}

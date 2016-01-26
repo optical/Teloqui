@@ -12,8 +12,15 @@ namespace Teloqui.Serialization {
 				return;
 			}
 
-			var attribute = value.GetType().GetCustomAttributes(typeof (EnumMemberAttribute), true).Cast<EnumMemberAttribute>().FirstOrDefault();
-			writer.WriteRawValue(attribute != null ? attribute.Value : value.ToString());
+			var attribute =
+				value.GetType()
+					.GetMember(value.ToString())
+					.Single()
+					.GetCustomAttributes(typeof (EnumMemberAttribute), true)
+					.Cast<EnumMemberAttribute>()
+					.Single();
+
+			writer.WriteValue(attribute != null ? attribute.Value : value.ToString());
 		}
 
 		public override bool CanConvert(Type objectType) {
@@ -36,13 +43,18 @@ namespace Teloqui.Serialization {
 				return null;
 			}
 
-			var lookup = type.GetFields().ToDictionary(
+			var lookup = type.GetFields().Where(field => field.FieldType == type).ToDictionary(
 				field => field.GetCustomAttributes(typeof (EnumMemberAttribute), true)
 					.Cast<EnumMemberAttribute>()
 					.Single().Value,
 				field => field.Name);
 
-			return Enum.Parse(objectType, lookup[reader.Value.ToString()]);
+			var convertedValue = lookup[reader.Value.ToString()];
+			if (convertedValue == null) {
+				throw new Exception($"Value {reader.Value} of type {type.FullName} Lacks an {nameof(EnumMemberAttribute)} - cannot deserialize!");
+			}
+
+			return Enum.Parse(objectType, convertedValue);
 		}
 	}
 }
