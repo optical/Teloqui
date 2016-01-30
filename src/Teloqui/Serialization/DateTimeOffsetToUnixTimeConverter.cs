@@ -4,13 +4,13 @@ using Newtonsoft.Json;
 
 namespace Teloqui.Serialization {
 	public class DateTimeOffsetToUnixTimeConverter : JsonConverter {
-		private static DateTimeOffset UnixEpoch { get; } = new DateTimeOffset(970, 1, 1, 0, 0, 0, TimeSpan.Zero);
+		private static DateTimeOffset UnixEpoch { get; } = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
 		public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer) {
 			if (value == null) {
 				writer.WriteValue((string)null);
 			} else {
-				writer.WriteValue(((DateTimeOffset)value - UnixEpoch).TotalSeconds.ToString(CultureInfo.InvariantCulture));
+				writer.WriteValue((long)((DateTimeOffset)value - UnixEpoch).TotalSeconds);
 			}
 		}
 

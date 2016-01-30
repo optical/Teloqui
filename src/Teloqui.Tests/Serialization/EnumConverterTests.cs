@@ -5,14 +5,11 @@ using Teloqui.Serialization;
 using Xunit;
 
 namespace Teloqui.Tests.Serialization {
-	public class EnumConverterTests {
-		private readonly JsonSerializerSettings _settings;
+	public class EnumConverterTests : SerializationTestBase {
 
-		public EnumConverterTests() {
-			_settings = new JsonSerializerSettings {
-				Converters = new JsonConverter[] { new EnumConverter() }
-			};
-		}
+		protected override JsonSerializerSettings Settings => new JsonSerializerSettings {
+			Converters = new JsonConverter[] { new EnumConverter() }
+		};
 
 		[Fact]
 		public void TestSimpleSerialization() {
@@ -77,15 +74,6 @@ namespace Teloqui.Tests.Serialization {
 			Assert.Throws<InvalidOperationException>(() => DeserializeObject<BrokenEnum>(@"""_valid_"""));
 		}
 
-		private string SerializeObject<T>(T plainObject) {
-			return JsonConvert.SerializeObject(plainObject, _settings);
-		}
-
-		private T DeserializeObject<T>(string value) {
-			return JsonConvert.DeserializeObject<T>(value, _settings);
-		}
-
-
 		[JsonObject]
 		private class SimpleClass {
 			[JsonProperty]
@@ -106,5 +94,6 @@ namespace Teloqui.Tests.Serialization {
 			Valid,
 			Invalid
 		}
+
 	}
 }
