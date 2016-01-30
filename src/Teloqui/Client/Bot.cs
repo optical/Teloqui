@@ -307,10 +307,10 @@ namespace Teloqui.Client {
 		}
 
 		private async Task<ApiResponse<T>> PerformRequest<T>(Func<Task<HttpResponseMessage>> messageFactory) {
-			HttpResponseMessage message = await messageFactory();
+			HttpResponseMessage message = await messageFactory().ConfigureAwait(false);
 			message.EnsureSuccessStatusCode();
 
-			using (Stream stream = await message.Content.ReadAsStreamAsync()) {
+			using (Stream stream = await message.Content.ReadAsStreamAsync().ConfigureAwait(false)) {
 				using (StreamReader reader = new StreamReader(stream)) {
 					using (JsonReader jsonReader = new JsonTextReader(reader)) {
 						return _serializer.Deserialize<ApiResponse<T>>(jsonReader);
