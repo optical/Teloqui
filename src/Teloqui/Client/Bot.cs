@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Teloqui.Data;
+using Teloqui.Data.InlineMode;
 
 namespace Teloqui.Client {
 
@@ -243,6 +244,11 @@ namespace Teloqui.Client {
 			}
 			
 			return PerformPost<UserProfilePhotos[]>("getUserProfilePhotos", parameters, cancellationToken);
+		}
+
+		// TODO: This needs to be implemented as a POST with a JSON body of type AnswerInlineQueryRequest
+		public Task AnswerInlineQuery(string inlineQueryId, IEnumerable<InlineQueryResult> results) {
+			return Task.FromResult<object>(null);
 		}
 
 		public Task<ApiResponse<Update[]>> GetUpdates(CancellationToken cancellationToken = default(CancellationToken)) {
