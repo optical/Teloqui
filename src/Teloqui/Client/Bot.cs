@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -22,7 +23,7 @@ namespace Teloqui.Client {
 		
 		public Bot(string authToken) {
 			AuthToken = authToken;
-			_httpClient = new HttpClient() {
+			_httpClient = new HttpClient {
 				BaseAddress = new Uri($"https://api.telegram.org/bot{authToken}/")
 			};
 			_serializer = new JsonSerializer {
@@ -35,7 +36,7 @@ namespace Teloqui.Client {
 		// Public methods
 
 		public Task<ApiResponse<User>> GetMeAsync() {
-			return PerformGet<User>("getMe");
+			return PerformGetAsync<User>("getMe");
 		}
 
 		public MessageResponse SendMessageAsync(
@@ -222,7 +223,7 @@ namespace Teloqui.Client {
 				["chat_id"] = chatId.ToString()
 			};
 
-			return PerformPost<bool>("sendChatAction", parameters, cancellationToken);
+			return PerformPostAsFormAsync<bool>("sendChatAction", parameters, cancellationToken);
 		}
 
 		public Task<ApiResponse<UserProfilePhotos[]>> GetUserProfilePhotosAsync(
@@ -243,24 +244,36 @@ namespace Teloqui.Client {
 				parameters["limit"] = limit.ToString();
 			}
 			
-			return PerformPost<UserProfilePhotos[]>("getUserProfilePhotos", parameters, cancellationToken);
+			return PerformPostAsFormAsync<UserProfilePhotos[]>("getUserProfilePhotos", parameters, cancellationToken);
 		}
 
 		// TODO: This needs to be implemented as a POST with a JSON body of type AnswerInlineQueryRequest
-		public Task AnswerInlineQuery(string inlineQueryId, IEnumerable<InlineQueryResult> results) {
-			return Task.FromResult<object>(null);
+		public Task AnswerInlineQuery(
+			string inlineQueryId, 
+			IEnumerable<InlineQueryResult> results, 
+			TimeSpan? cacheTime = null,
+			bool? isPersonal = null,
+			string nextOffset  = null,
+			CancellationToken cancellationToken = default(CancellationToken)) {
+
+			var body = new AnswerInlineQueryRequest(inlineQueryId, results);
+			body.CacheTime = cacheTime ?? body.CacheTime;
+			body.IsPersonal = isPersonal ?? body.IsPersonal;
+			body.NextOffset = nextOffset ?? body.NextOffset;
+
+			return PerformPostAsJsonAsync<bool>("answerInlineQuery", body, cancellationToken);
 		}
 
 		public Task<ApiResponse<Update[]>> GetUpdates(CancellationToken cancellationToken = default(CancellationToken)) {
-			return PerformGet<Update[]>("getUpdates", cancellationToken);
+			return PerformGetAsync<Update[]>("getUpdates", cancellationToken);
 		}
 
 		public Task<ApiResponse<object>> GetFileAsync(string fileId, CancellationToken cancellationToken = default(CancellationToken)) {
-			return PerformGet<object>("getFile", cancellationToken);
+			return PerformGetAsync<object>("getFile", cancellationToken);
 		}
 
 		public Task<ApiResponse<bool>> DisableWebHookAsync(CancellationToken cancellationToken = default(CancellationToken)) {
-			return PerformPost<bool>("setWebhook", new ParameterList(), cancellationToken);
+			return PerformPostAsFormAsync<bool>("setWebhook", new ParameterList(), cancellationToken);
 		}
 
 		public Task<ApiResponse<bool>> SetWebHookAsync(string url, CancellationToken cancellationToken = default(CancellationToken)) {
@@ -272,7 +285,7 @@ namespace Teloqui.Client {
 				["url"] = url.ToString()
 			};
 
-			return PerformPost<bool>("setWebhook", parameters, cancellationToken);
+			return PerformPostAsFormAsync<bool>("setWebhook", parameters, cancellationToken);
 		}
 
 		// Internals
@@ -293,26 +306,40 @@ namespace Teloqui.Client {
 				parameters["reply_to_message_id"] = replyToMessageId.ToString();
 			}
 
-			return PerformPost<Message>(method, parameters, cancellationToken);
+			return PerformPostAsFormAsync<Message>(method, parameters, cancellationToken);
 		}
 
-		private Task<ApiResponse<T>> PerformGet<T>(string method, CancellationToken cancellationToken = default(CancellationToken)) {
-			return PerformRequest<T>(() => _httpClient.GetAsync(method, cancellationToken));
+		private Task<ApiResponse<T>> PerformGetAsync<T>(string method, CancellationToken cancellationToken = default(CancellationToken)) {
+			return PerformRequestAsync<T>(() => _httpClient.GetAsync(method, cancellationToken));
 		}
 
-		private Task<ApiResponse<T>> PerformPost<T>(
+		private Task<ApiResponse<T>> PerformPostAsFormAsync<T>(
 			string method,
 			IEnumerable<KeyValuePair<string, string>> parameters,
 			CancellationToken cancellationToken = default(CancellationToken)) {
 
-			return PerformRequest<T>(() => {
+			return PerformRequestAsync<T>(() => {
 				using (var httpContent = new FormUrlEncodedContent(parameters)) {
 					return _httpClient.PostAsync(method, httpContent, cancellationToken);
 				}
 			});
 		}
 
-		private async Task<ApiResponse<T>> PerformRequest<T>(Func<Task<HttpResponseMessage>> messageFactory) {
+		private Task<ApiResponse<T>> PerformPostAsJsonAsync<T>(
+			string method,
+			object body,
+			CancellationToken cancellationToken = default(CancellationToken)) {
+
+			return PerformRequestAsync<T>(() => _httpClient.PostAsync(
+				method,
+				new StringContent(
+					JsonConvert.SerializeObject(body),
+					Encoding.UTF8,
+					"application/json"),
+				cancellationToken));
+		}
+
+		private async Task<ApiResponse<T>> PerformRequestAsync<T>(Func<Task<HttpResponseMessage>> messageFactory) {
 			HttpResponseMessage message = await messageFactory().ConfigureAwait(false);
 			message.EnsureSuccessStatusCode();
 
