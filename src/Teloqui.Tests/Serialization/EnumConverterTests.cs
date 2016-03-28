@@ -22,11 +22,6 @@ namespace Teloqui.Tests.Serialization {
 		}
 
 		[Fact]
-		public void TestFailsSerializationOnEnumValueWithoutAttribute() {
-			Assert.Throws<InvalidOperationException>(() => SerializeObject(BrokenEnum.Invalid));
-		}
-
-		[Fact]
 		public void TestSerializesObjectWithDefaultCorrectly() {
 			var originalObject = new SimpleClass();
 			var result = SerializeObject(originalObject);
