@@ -68,10 +68,10 @@ namespace Teloqui.Client {
 			bool? disableWebPagePreview = null,
 			int? replyToMessageId = null,
 			ReplyMarkup replyToMarkup = null,
-			bool isMarkDown = false,
+			ParseMode? parseMode = null,
 			CancellationToken cancellationToken = default(CancellationToken)) {
 
-			return SendMessageAsync(destination.Id, message, disableWebPagePreview, replyToMessageId, replyToMarkup, isMarkDown, cancellationToken);
+			return SendMessageAsync(destination.Id, message, disableWebPagePreview, replyToMessageId, replyToMarkup, parseMode, cancellationToken);
 		}
 
 		public MessageResponse SendMessageAsync(
@@ -80,14 +80,14 @@ namespace Teloqui.Client {
 			bool? disableWebPagePreview = null,
 			int? replyToMessageId = null,
 			ReplyMarkup replyToMarkup = null,
-			bool isMarkDown = false,
+			ParseMode? parseMode = null,
 			CancellationToken cancellationToken = default(CancellationToken)) {
 			var parameters = new ParameterList {
 				["text"] = message
 			};
 
-			if (isMarkDown) {
-				parameters["parse_mode"] = "Markdown";
+			if (parseMode != null) {
+				parameters["parse_mode"] = parseMode.Value.GetMemberAttribute().Value;
 			}
 
 			return SendMessageInternal("sendMessage", destinationId, parameters, disableWebPagePreview, replyToMessageId, replyToMarkup, cancellationToken);

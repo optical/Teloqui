@@ -12,13 +12,7 @@ namespace Teloqui.Serialization {
 				return;
 			}
 
-			var attribute =
-				value.GetType()
-					.GetMember(value.ToString())
-					.Single()
-					.GetCustomAttributes(typeof (EnumMemberAttribute), true)
-					.Cast<EnumMemberAttribute>()
-					.Single();
+			var attribute = ((Enum) value).GetMemberAttribute();
 
 			writer.WriteValue(attribute != null ? attribute.Value : value.ToString());
 		}
