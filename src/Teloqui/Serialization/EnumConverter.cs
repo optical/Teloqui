@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reflection;
 using Newtonsoft.Json;
 using Teloqui.Data;
 
@@ -18,7 +19,7 @@ namespace Teloqui.Serialization {
 		}
 
 		public override bool CanConvert(Type objectType) {
-			return objectType.IsEnum;
+			return objectType.GetTypeInfo().IsEnum;
 		}
 
 		public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) {
@@ -26,7 +27,7 @@ namespace Teloqui.Serialization {
 				throw new Exception("Non-String value is not allowed");
 			}
 
-			bool isNullable = objectType.IsGenericType && objectType.GetGenericTypeDefinition() == typeof (Nullable<>);
+			bool isNullable = objectType.GetTypeInfo().IsGenericType && objectType.GetGenericTypeDefinition() == typeof (Nullable<>);
 			Type type = isNullable ? Nullable.GetUnderlyingType(objectType) : objectType;
 
 			if (reader.TokenType == JsonToken.Null) {

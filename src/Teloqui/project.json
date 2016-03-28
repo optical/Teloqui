@@ -10,16 +10,25 @@
   "projectUrl": "",
   "licenseUrl": "",
   "dependencies": {
-    "Newtonsoft.Json": "7.0.1",
     "Microsoft.AspNet.WebApi.Client": "5.2.3",
     "Microsoft.AspNet.WebUtilities": "1.0.0-rc1-final",
-    "Microsoft.CSharp": "4.0.0"
+    "Microsoft.CSharp": "4.0.0",
+    "System.Net.Http":  "4.0.1-beta-23225",
+    "Newtonsoft.Json": "7.0.1"
   },
   "frameworks": {
     "net451": { },
     "net452": { },
     "net46": { },
     "dnx451": { },
-    "dnx452": { }
+    "dnx452": { },
+    "dnxcore50": {
+      "dependencies": {
+        "System.Collections": "4.0.10",
+        "System.Collections.Concurrent": "4.0.11-beta-23516",
+        "System.Reflection": "4.0.10"
+      }
+    }
+
   }
 }

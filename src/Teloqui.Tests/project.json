@@ -19,6 +19,11 @@
       "dependencies": {
         "xunit.runner.dnx": "2.1.0-rc1-build204"
       }
+    },
+    "dnxcore50": {
+      "dependencies": {
+        "xunit.runner.dnx": "2.1.0-rc1-build204"
+      }
     }
   },
   "dependencies": {
