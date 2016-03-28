@@ -1,0 +1,29 @@
+﻿{
+  "version": "1.0.0-*",
+  "description": "Teloqui.PollingSample Console Application",
+  "authors": [
+    "Jared Klopper <jaredklopper@gmail.com>"
+  ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+
+  "dependencies": {
+    "Mono.Options": "4.2.2.1",
+    "Teloqui": "0.0.1-*"
+  },
+
+  "commands": {
+    "Teloqui.PollingSample": "Teloqui.PollingSample"
+  },
+
+  "frameworks": {
+    "net452": { },
+    "dnx451": { },
+    "dnx452": { }
+  }
+}

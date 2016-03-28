@@ -7,7 +7,11 @@ namespace Teloqui.Data.InlineMode {
 
 		public override string Type => "photo";
 
-		public InlineQueryResultPhoto(string id, Uri photoUri, Uri thumbUri)
+		public InlineQueryResultPhoto(Uri photoUri, Uri thumbUri) 
+			: this(photoUri, thumbUri, Guid.NewGuid().ToString()) {
+		}
+
+		public InlineQueryResultPhoto(Uri photoUri, Uri thumbUri, string id)
 			: base(id) {
 			PhotoUrl = photoUri;
 			ThumbUrl = thumbUri;

@@ -1,41 +1,64 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Microsoft.AspNet.WebUtilities;
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+
 using Teloqui.Data;
 using Teloqui.Data.InlineMode;
 
 namespace Teloqui.Client {
 
-	using MessageResponse = Task<ApiResponse<Message>>;
+	using MessageResponse = Task<Message>;
 	using ParameterList = Dictionary<string, string>;
 	using ReplyMarkup = Object;
 
 	public class Bot {
-		private readonly HttpClient _httpClient;
-		private readonly JsonSerializer _serializer;
-		
+		private readonly ConcurrentDictionary<TimeSpan, HttpClient> _httpClientCache;
+		private readonly JsonSerializer _deserializer;
+		private readonly JsonSerializerSettings _serializerSettings;
+
 		public Bot(string authToken) {
 			AuthToken = authToken;
-			_httpClient = new HttpClient {
-				BaseAddress = new Uri($"https://api.telegram.org/bot{authToken}/")
+			_httpClientCache = new ConcurrentDictionary<TimeSpan, HttpClient>();
+			_serializerSettings = new JsonSerializerSettings {
+				DefaultValueHandling = DefaultValueHandling.Ignore,
+				Converters = { new StringEnumConverter() }
 			};
-			_serializer = new JsonSerializer {
+
+			_deserializer = new JsonSerializer() {
+				DefaultValueHandling = DefaultValueHandling.Ignore,
 				Converters = { new StringEnumConverter() }
 			};
 		}
 
-		public string AuthToken { get; private set; }
+		public string AuthToken { get; }
+
+		/// <summary>
+		/// Returns the period added onto the HTTP Request when making a long polling request.
+		/// This is used to prevent a TaskCanceledException being raised due to the request taking at least as long as the timeout specified.
+		/// Eg a 30 second timeout, with a LongPollingTimeoutBufferPeriod of 5 will take at most 35 seconds. 30 seconds for telegram to handle the request, 5 seconds leniency due to inherent latency
+		/// </summary>
+		public TimeSpan LongPollingTimeoutBufferPeriod { get; set; } = TimeSpan.FromSeconds(5);
+
+		/// <summary>
+		/// Timeout for requests which do not explicitly take in a timeout, ie non-polling requests.
+		/// </summary>
+		public static TimeSpan StandardRequestTimeout { get; set; } = TimeSpan.FromSeconds(100);
 
 		// Public methods
 
-		public Task<ApiResponse<User>> GetMeAsync() {
+		public Task<User> GetMeAsync() {
 			return PerformGetAsync<User>("getMe");
 		}
 
@@ -204,8 +227,8 @@ namespace Teloqui.Client {
 			ReplyMarkup replyToMarkup = null,
 			CancellationToken cancellationToken = default(CancellationToken)) {
 			var parameters = new ParameterList {
-				["latitude"] = latitude.ToString(),
-				["longitude"] = longitude.ToString()
+				["latitude"] = latitude.ToString(CultureInfo.InvariantCulture),
+				["longitude"] = longitude.ToString(CultureInfo.InvariantCulture)
 			};
 
 			return SendMessageInternal(
@@ -217,18 +240,18 @@ namespace Teloqui.Client {
 				cancellationToken: cancellationToken);
 		}
 
-		public Task<ApiResponse<bool>> SendChatUpdateAsync(int chatId, ChatAction action, CancellationToken cancellationToken = default(CancellationToken)) {
+		public Task<bool> SendChatUpdateAsync(int chatId, ChatAction action, CancellationToken cancellationToken = default(CancellationToken)) {
 			var parameters = new ParameterList {
 				["action"] = action.GetType().GetRuntimeField(action.ToString()).GetCustomAttribute<EnumMemberAttribute>().Value,
 				["chat_id"] = chatId.ToString()
 			};
 
-			return PerformPostAsFormAsync<bool>("sendChatAction", parameters, cancellationToken);
+			return PerformPostAsFormAsync<bool>("sendChatAction", parameters, cancellationToken: cancellationToken);
 		}
 
-		public Task<ApiResponse<UserProfilePhotos[]>> GetUserProfilePhotosAsync(
+		public Task<UserProfilePhotos[]> GetUserProfilePhotosAsync(
 			int userId,
-			int? offset = null, 
+			int? offset = null,
 			int? limit = null,
 			CancellationToken cancellationToken = default(CancellationToken)) {
 
@@ -243,17 +266,17 @@ namespace Teloqui.Client {
 			if (limit.HasValue) {
 				parameters["limit"] = limit.ToString();
 			}
-			
-			return PerformPostAsFormAsync<UserProfilePhotos[]>("getUserProfilePhotos", parameters, cancellationToken);
+
+			return PerformPostAsFormAsync<UserProfilePhotos[]>("getUserProfilePhotos", parameters, cancellationToken: cancellationToken);
 		}
 
 		// TODO: This needs to be implemented as a POST with a JSON body of type AnswerInlineQueryRequest
 		public Task AnswerInlineQuery(
-			string inlineQueryId, 
-			IEnumerable<InlineQueryResult> results, 
+			string inlineQueryId,
+			IEnumerable<InlineQueryResult> results,
 			TimeSpan? cacheTime = null,
 			bool? isPersonal = null,
-			string nextOffset  = null,
+			string nextOffset = null,
 			CancellationToken cancellationToken = default(CancellationToken)) {
 
 			var body = new AnswerInlineQueryRequest(inlineQueryId, results);
@@ -261,31 +284,54 @@ namespace Teloqui.Client {
 			body.IsPersonal = isPersonal ?? body.IsPersonal;
 			body.NextOffset = nextOffset ?? body.NextOffset;
 
-			return PerformPostAsJsonAsync<bool>("answerInlineQuery", body, cancellationToken);
+			return PerformPostAsJsonAsync<bool>("answerInlineQuery", body, cancellationToken: cancellationToken);
 		}
 
-		public Task<ApiResponse<Update[]>> GetUpdates(CancellationToken cancellationToken = default(CancellationToken)) {
-			return PerformGetAsync<Update[]>("getUpdates", cancellationToken);
+		public Task<Update[]> GetUpdates(
+			int? offset = null,
+			long? limit = null,
+			TimeSpan? timeout = null,
+			CancellationToken cancellationToken = default(CancellationToken)) {
+
+			var parameters = new ParameterList();
+			if (offset.HasValue) {
+				parameters["offset"] = offset.ToString();
+			}
+
+			if (limit.HasValue) {
+				parameters["limit"] = limit.ToString();
+			}
+
+			if (timeout != null) {
+				parameters["timeout"] = timeout.Value.TotalSeconds.ToString(CultureInfo.InvariantCulture);
+			}
+
+			if (!offset.HasValue) {
+				return PerformGetAsync<Update[]>("getUpdates", parameters, cancellationToken: cancellationToken);
+			}
+
+			// Passing in an offset means the request is no longer idempotent, and so should be POSTed instead.
+			return PerformPostAsFormAsync<Update[]>("getUpdates", parameters, timeout + LongPollingTimeoutBufferPeriod, cancellationToken);
 		}
 
-		public Task<ApiResponse<object>> GetFileAsync(string fileId, CancellationToken cancellationToken = default(CancellationToken)) {
-			return PerformGetAsync<object>("getFile", cancellationToken);
+		public Task<object> GetFileAsync(string fileId, CancellationToken cancellationToken = default(CancellationToken)) {
+			return PerformGetAsync<object>("getFile", null, cancellationToken: cancellationToken);
 		}
 
-		public Task<ApiResponse<bool>> DisableWebHookAsync(CancellationToken cancellationToken = default(CancellationToken)) {
-			return PerformPostAsFormAsync<bool>("setWebhook", new ParameterList(), cancellationToken);
+		public Task<bool> DisableWebHookAsync(CancellationToken cancellationToken = default(CancellationToken)) {
+			return PerformPostAsFormAsync<bool>("setWebhook", new ParameterList(), cancellationToken: cancellationToken);
 		}
 
-		public Task<ApiResponse<bool>> SetWebHookAsync(string url, CancellationToken cancellationToken = default(CancellationToken)) {
+		public Task<bool> SetWebHookAsync(string url, CancellationToken cancellationToken = default(CancellationToken)) {
 			return SetWebHookAsync(new Uri(url), cancellationToken);
 		}
 
-		public Task<ApiResponse<bool>> SetWebHookAsync(Uri url, CancellationToken cancellationToken = default(CancellationToken)) {
+		public Task<bool> SetWebHookAsync(Uri url, CancellationToken cancellationToken = default(CancellationToken)) {
 			var parameters = new ParameterList {
 				["url"] = url.ToString()
 			};
 
-			return PerformPostAsFormAsync<bool>("setWebhook", parameters, cancellationToken);
+			return PerformPostAsFormAsync<bool>("setWebhook", parameters, cancellationToken: cancellationToken);
 		}
 
 		// Internals
@@ -306,50 +352,73 @@ namespace Teloqui.Client {
 				parameters["reply_to_message_id"] = replyToMessageId.ToString();
 			}
 
-			return PerformPostAsFormAsync<Message>(method, parameters, cancellationToken);
+			return PerformPostAsFormAsync<Message>(method, parameters, cancellationToken: cancellationToken);
 		}
 
-		private Task<ApiResponse<T>> PerformGetAsync<T>(string method, CancellationToken cancellationToken = default(CancellationToken)) {
-			return PerformRequestAsync<T>(() => _httpClient.GetAsync(method, cancellationToken));
-		}
-
-		private Task<ApiResponse<T>> PerformPostAsFormAsync<T>(
+		private Task<T> PerformGetAsync<T>(
 			string method,
-			IEnumerable<KeyValuePair<string, string>> parameters,
+			ParameterList parameters = null,
+			TimeSpan? timeout = null,
 			CancellationToken cancellationToken = default(CancellationToken)) {
 
-			return PerformRequestAsync<T>(() => {
+			string uri = method;
+			if (parameters != null) {
+				uri = QueryHelpers.AddQueryString(uri, parameters);
+			}
+			return PerformRequestAsync<T>(() => GetHttpClient(timeout).GetAsync(uri, cancellationToken));
+		}
+
+		private Task<T> PerformPostAsFormAsync<T>(
+			string method,
+			IEnumerable<KeyValuePair<string, string>> parameters,
+			TimeSpan? timeout = null,
+			CancellationToken cancellationToken = default(CancellationToken)) {
+
+			return PerformRequestAsync<T>(async () => {
 				using (var httpContent = new FormUrlEncodedContent(parameters)) {
-					return _httpClient.PostAsync(method, httpContent, cancellationToken);
+					return await GetHttpClient(timeout).PostAsync(method, httpContent, cancellationToken).ConfigureAwait(false);
 				}
 			});
 		}
 
-		private Task<ApiResponse<T>> PerformPostAsJsonAsync<T>(
+		private Task<T> PerformPostAsJsonAsync<T>(
 			string method,
 			object body,
+			TimeSpan? timeout = null,
 			CancellationToken cancellationToken = default(CancellationToken)) {
 
-			return PerformRequestAsync<T>(() => _httpClient.PostAsync(
+			return PerformRequestAsync<T>(() => GetHttpClient(timeout).PostAsync(
 				method,
 				new StringContent(
-					JsonConvert.SerializeObject(body),
+					JsonConvert.SerializeObject(body, _serializerSettings),
 					Encoding.UTF8,
 					"application/json"),
 				cancellationToken));
 		}
 
-		private async Task<ApiResponse<T>> PerformRequestAsync<T>(Func<Task<HttpResponseMessage>> messageFactory) {
+		private async Task<T> PerformRequestAsync<T>(Func<Task<HttpResponseMessage>> messageFactory) {
 			HttpResponseMessage message = await messageFactory().ConfigureAwait(false);
-			message.EnsureSuccessStatusCode();
 
 			using (Stream stream = await message.Content.ReadAsStreamAsync().ConfigureAwait(false)) {
 				using (StreamReader reader = new StreamReader(stream)) {
 					using (JsonReader jsonReader = new JsonTextReader(reader)) {
-						return _serializer.Deserialize<ApiResponse<T>>(jsonReader);
+						var response = _deserializer.Deserialize<ApiResponse<T>>(jsonReader);
+						if (response.Ok) {
+							message.EnsureSuccessStatusCode();
+							return response.Result;
+						} else {
+							throw new TelegramException(response.Description, response.ErrorCode);
+						}
 					}
 				}
 			}
+		}
+
+		private HttpClient GetHttpClient(TimeSpan? timeout = null) {
+			TimeSpan actualTimeout = timeout ?? StandardRequestTimeout;
+			return _httpClientCache.GetOrAdd(actualTimeout, timespan => new HttpClient {
+				BaseAddress = new Uri($"https://api.telegram.org/bot{AuthToken}/"),
+			});
 		}
 	}
 }

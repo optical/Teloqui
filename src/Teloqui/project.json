@@ -12,10 +12,10 @@
   "dependencies": {
     "Newtonsoft.Json": "7.0.1",
     "Microsoft.AspNet.WebApi.Client": "5.2.3",
+    "Microsoft.AspNet.WebUtilities": "1.0.0-rc1-final",
     "Microsoft.CSharp": "4.0.0"
   },
   "frameworks": {
-    "net45": { },
     "net451": { },
     "net452": { },
     "net46": { },

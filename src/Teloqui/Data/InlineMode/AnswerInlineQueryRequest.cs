@@ -18,8 +18,9 @@ namespace Teloqui.Data.InlineMode {
 		[JsonProperty("results")]
 		public IList<InlineQueryResult> Results { get; set; }
 
-		[JsonProperty("cache_time")]
-		//TODO: Write a converter to write this out as seconds
+		[JsonIgnore]
+		// [JsonProperty("cache_time")]
+		// TODO: Write a converter to write this out as seconds
 		public TimeSpan CacheTime { get; set; }
 
 		[JsonProperty("is_personal")]

@@ -22,6 +22,9 @@ pushd src
 pushd Teloqui
 call dnu build
 popd
+pushd Teloqui.PollingSample
+call dnu build
+popd
 pushd Teloqui.Tests
 call dnu build
 call dnx test

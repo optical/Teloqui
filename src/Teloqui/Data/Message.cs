@@ -5,6 +5,8 @@ using Teloqui.Serialization;
 namespace Teloqui.Data {
 	[JsonObject]
 	public class Message {
+		public const int MaxTextLength = 4096;
+		private string _text;
 
 		[JsonProperty("message_id")]
 		public int MessageId { get; set; }
@@ -30,7 +32,16 @@ namespace Teloqui.Data {
 		public Message ReplyToMessage { get; set; }
 
 		[JsonProperty("text")]
-		public string Text { get; set; }
+		public string Text {
+			get { return _text; }
+			set {
+				if (value.Length > MaxTextLength) {
+					throw new ArgumentException($"{nameof(Text)} may not be larger than {MaxTextLength} in size");
+
+				}
+				_text = value;
+			}
+		}
 
 		[JsonProperty("audio")]
 		public Audio Audio { get; set; }
@@ -65,7 +76,7 @@ namespace Teloqui.Data {
 		[JsonProperty("new_chat_photo")]
 		public PhotoSize[] NewChatPhoto { get; set; }
 
-		[JsonProperty(PropertyName= "delete_chat_photo")]
+		[JsonProperty(PropertyName = "delete_chat_photo")]
 		public bool? DeleteChatPhoto { get; set; }
 
 		[JsonProperty("group_chat_created")]

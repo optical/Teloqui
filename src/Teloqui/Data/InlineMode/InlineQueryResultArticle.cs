@@ -1,11 +1,16 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 
 namespace Teloqui.Data.InlineMode {
 	[JsonObject]
 	public class InlineQueryResultArticle : InlineQueryResult {
 		public override string Type => "article";
 
-		public InlineQueryResultArticle(string id, string title, string message)
+		public InlineQueryResultArticle(string title, string message) 
+			: this(title, message, Guid.NewGuid().ToString()) {
+		}
+
+		public InlineQueryResultArticle(string title, string message, string id)
 			: base(id) {
 			Title = title;
 			MessageText = message;

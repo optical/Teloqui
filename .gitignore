@@ -1,2 +1,4 @@
 bin/
 project.lock.json
+src/.vs/
+src/Teloqui.PollingSample/Properties/launchSettings.json

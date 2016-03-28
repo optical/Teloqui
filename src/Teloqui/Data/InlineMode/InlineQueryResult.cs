@@ -7,6 +7,9 @@ namespace Teloqui.Data.InlineMode {
 
 		private string _messageText;
 
+		protected InlineQueryResult() : this(Guid.NewGuid().ToString()) {
+		}
+
 		protected InlineQueryResult(string id) {
 			Id = id;
 		}
@@ -15,7 +18,7 @@ namespace Teloqui.Data.InlineMode {
 		public abstract string Type { get; }
 
 		[JsonProperty("id")]
-		public string Id { get; set; }
+		public string Id { get; }
 
 		[JsonProperty("title")]
 		public string Title { get; set; }
@@ -30,7 +33,7 @@ namespace Teloqui.Data.InlineMode {
 		[JsonProperty("disable_web_page_preview")]
 		public bool DisableWebPagePreview { get; set; }
 
-		[JsonProperty("thumb_url")]
+		[JsonProperty("thumb_url", DefaultValueHandling = DefaultValueHandling.Ignore)]
 		public Uri ThumbUrl { get; set; }
 
 		[JsonProperty("message_text")]
