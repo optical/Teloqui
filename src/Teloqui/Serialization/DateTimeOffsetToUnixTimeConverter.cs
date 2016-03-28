@@ -8,7 +8,7 @@ namespace Teloqui.Serialization {
 
 		public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer) {
 			if (value == null) {
-				writer.WriteValue((string)null);
+				writer.WriteNull();
 			} else {
 				writer.WriteValue((long)((DateTimeOffset)value - UnixEpoch).TotalSeconds);
 			}

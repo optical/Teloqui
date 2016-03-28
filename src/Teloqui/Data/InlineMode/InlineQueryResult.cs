@@ -27,8 +27,7 @@ namespace Teloqui.Data.InlineMode {
 		public string Description { get; set; }
 
 		[JsonProperty("parse_mode")]
-		// TODO: Make change type here from a string to an enum
-		public string ParseMode { get; set; }
+		public ParseMode ParseMode { get; set; }
 
 		[JsonProperty("disable_web_page_preview")]
 		public bool DisableWebPagePreview { get; set; }

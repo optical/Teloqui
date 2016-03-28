@@ -270,7 +270,6 @@ namespace Teloqui.Client {
 			return PerformPostAsFormAsync<UserProfilePhotos[]>("getUserProfilePhotos", parameters, cancellationToken: cancellationToken);
 		}
 
-		// TODO: This needs to be implemented as a POST with a JSON body of type AnswerInlineQueryRequest
 		public Task AnswerInlineQuery(
 			string inlineQueryId,
 			IEnumerable<InlineQueryResult> results,

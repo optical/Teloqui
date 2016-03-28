@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
+using Teloqui.Serialization;
 
 namespace Teloqui.Data.InlineMode {
 	[JsonObject]
@@ -18,9 +19,8 @@ namespace Teloqui.Data.InlineMode {
 		[JsonProperty("results")]
 		public IList<InlineQueryResult> Results { get; set; }
 
-		[JsonIgnore]
-		// [JsonProperty("cache_time")]
-		// TODO: Write a converter to write this out as seconds
+		[JsonProperty("cache_time")]
+		[JsonConverter(typeof(TimeSpanToSecondsConverter))]
 		public TimeSpan CacheTime { get; set; }
 
 		[JsonProperty("is_personal")]
