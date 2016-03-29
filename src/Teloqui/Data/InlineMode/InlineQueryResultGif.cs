@@ -6,18 +6,23 @@ namespace Teloqui.Data.InlineMode {
 	public class InlineQueryResultGif : InlineQueryResultWithCaption {
 		public override string Type => "gif";
 
-		public InlineQueryResultGif(Uri gifUri, Uri thumbUri, string id)
+		public InlineQueryResultGif(Uri gifUri, string id)
 			: base(id) {
 			GifUrl = gifUri;
-			ThumbUrl = thumbUri;
+			// Non-optional argument, but can be overridden with a proper thumbnail as needed
+			ThumbUrl = GifUrl;
 		}
 
-		public InlineQueryResultGif(Uri gifUri, Uri thumbUri)
-			: this(gifUri, thumbUri, Guid.NewGuid().ToString()) {
+		public InlineQueryResultGif(Uri gifUri)
+			: this(gifUri, Guid.NewGuid().ToString()) {
 		}
 
-		public InlineQueryResultGif(string gifUri, string tumbUri) 
-			: this(new Uri(gifUri), new Uri(tumbUri)) {
+		public InlineQueryResultGif(string gifUri, string id)
+			: this(new Uri(gifUri), id) {
+		}
+
+		public InlineQueryResultGif(string gifUri)
+			: this(new Uri(gifUri)) {
 		}
 
 		[JsonProperty("gif_url")]

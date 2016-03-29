@@ -45,7 +45,7 @@ namespace Teloqui.PollingSample {
 			Console.WriteLine($"Inline query from {query.From.Username}. Query: {query.Query}");
 			await _bot.AnswerInlineQuery(query.Id, new InlineQueryResult[] {
 				new InlineQueryResultArticle("Test", "Test Message"),
-				new InlineQueryResultGif("https://media.giphy.com/media/8zxuWCs0S2iqs/giphy.gif", "https://media.giphy.com/media/8zxuWCs0S2iqs/giphy.gif"), 
+				new InlineQueryResultGif("https://media.giphy.com/media/8zxuWCs0S2iqs/giphy.gif"), 
 			}, TimeSpan.FromSeconds(120));
 
 		}

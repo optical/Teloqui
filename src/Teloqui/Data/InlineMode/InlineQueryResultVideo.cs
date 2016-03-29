@@ -5,6 +5,10 @@ namespace Teloqui.Data.InlineMode {
 	public class InlineQueryResultVideo : InlineQueryResult {
 		public override string Type => "video";
 
+		public InlineQueryResultVideo(string videoUri, string thumbUri, VideoMimeType mimeType, string messageText, string title)
+			: this(new Uri(videoUri), new Uri(thumbUri), mimeType, messageText, title, Guid.NewGuid().ToString()) {
+		}
+
 		public InlineQueryResultVideo(Uri videoUri, Uri thumbUri, VideoMimeType mimeType, string messageText, string title) 
 			: this(videoUri, thumbUri, mimeType, messageText, title, Guid.NewGuid().ToString()) {
 		}
